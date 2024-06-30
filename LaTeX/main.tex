@@ -141,7 +141,7 @@ empresa        & 3       \\\hline
 tipoveiculo  & 4       \\\hline
 camera\_numero & 1421    \\\hline
 \end{tabular}
-\caption{\label{tab:description}Valores distintos de cada coluna categóricas.}
+\caption{\label{tab:categorics}Valores distintos de cada coluna categóricas.}
 \end{table}
 
 \subsubsection{Número de registros por cada câmera de radar}
@@ -192,7 +192,7 @@ WHERE
 
 Percebemos também, ao visualizar os dados que não se encontram dentro dos limites esperados, casos de sinal trocado, como latitude "22.9", o qual provavelmente podemos assumir que deveria ser o valor "-22.9", dentro dos limites de latitude do município. Tais dados não serão considerados neste estudo exploratório, porém podem ser tratados e incluidos futuramente.
 
-\begin{lstlisting}[language=SQL,caption={Query SQL para identificar se existem casos inconsistentes onde registros feitos pela mesma câmera de radar apresentam valores diferentes de latitude e longitude entre si. Não existem.},label={lst:sqlquery2}]
+\begin{lstlisting}[language=SQL,caption={Query SQL para identificar se existem casos inconsistentes onde registros feitos pela mesma câmera de radar apresentam valores diferentes de latitude e longitude entre si. Não existem.},label={lst:sqlquery3}]
 SELECT 
     camera_numero, 
     COUNT(DISTINCT camera_latitude) AS unique_latitudes,
@@ -209,9 +209,9 @@ HAVING
 
 Podemos observar nos dados alguns valores com latitude ou longitude muito distante do esperado para radares no município do Rio de Janeiro. Conseguimos através do Google Maps determinar que, em grosso modo, os limites do município se encontram nas latitudes (-22.773 S, -43.152 W) ponto extremo nordeste do Municipio, e (-23.061 S, -43.765 W) ponto extremo sudoeste do Município. Podemos então nos conter com os dados que se encaixam dentro desses limites inferiores e superiores.
 
-Para diminuir o uso posterior de recursos da máquina, excluímos, diretamente na SQL, qualquer valor de latitude ou longitude fora do esperado, chegando assim a 29.949.144 instâncias  de  dados  de  captura  de  radares  dentro  das  condições  estabelecidas \ref{lst:sqlquery2}.
+Para diminuir o uso posterior de recursos da máquina, excluímos, diretamente na SQL, qualquer valor de latitude ou longitude fora do esperado, chegando assim a 29.949.144 instâncias  de  dados  de  captura  de  radares  dentro  das  condições  estabelecidas \ref{lst:sqlquery4}.
 
-\begin{lstlisting}[language=SQL,caption={Query SQL para recuperar dados de radares dentro de um modelo retângular do Município do Rio de Janeiro},label={lst:sqlquery2}]
+\begin{lstlisting}[language=SQL,caption={Query SQL para recuperar dados de radares dentro de um modelo retângular do Município do Rio de Janeiro},label={lst:sqlquery4}]
 SELECT
   TO_HEX(placa) AS placa_hex,
   TO_HEX(empresa) AS empresa_hex,
@@ -258,16 +258,18 @@ Sobrepondo alguns dos pontos em um mapa do município obtemos \ref{fig:disp1000M
 
 \subsection{Mesma placa em dois veículos de tipos diferentes}
 
-Uma maneira simples de detectar placas potencialmente clonadas é verificar se existem dois (ou mais) registros da mesma placa na tabela com valores de \textit{tipoveiculo} distintos. Isso indica que uma mesma placa está sendo utilizada, ou, potencialmente, que houve algum erro no processo de detecção do \textit{tipoveiculo} no momento da captura. 
+Uma maneira simples de detectar placas potencialmente clonadas é verificar se existem dois (ou mais) registros da mesma placa na tabela com valores de \textit{tipoveiculo} distintos. Isso indica que uma mesma placa está sendo utilizada em veículos distintos, ou, potencialmente, que houve algum erro no processo de detecção do \textit{tipoveiculo} no momento da captura. 
 
-Para identificar este segundo caso, podemos analisar os identificadores dos radares, verificando assim se existe algum padrão que indique falhas sistemáticas em um ou mais dos radares, o que geraria falsos positivos.
-
-\begin{lstlisting}[language=SQL,caption={Query SQL para identificar inconsistências de placa com tipo de veículo. São retornadas todas as placas as quais existem dois (ou mais) registros na tabela com valores de \textit{tipoveiculo} distintos.},label={lst:sqlquery}]
+\begin{lstlisting}[language=SQL,caption={Query SQL para identificar inconsistências de placa com tipo de veículo. São retornadas todas as placas as quais existem dois (ou mais) registros na tabela com valores de \textit{tipoveiculo} distintos.},label={lst:sqlquery5}]
 SELECT placa FROM `rj-cetrio.desafio.readings_2024_06`
 GROUP BY placa HAVING COUNT(DISTINCT tipoveiculo) > 1;
 \end{lstlisting}
 
 Seguindo este critério, encontramos 441.652 placas inconsistentes.
+
+Para identificar o segundo caso (erro na detecção do \textit{tipoveiculo}), podemos analisar os identificadores dos radares, verificando se existe algum padrão que indique falhas sistemáticas em um ou mais dos radares, o que geraria falsos positivos.
+
+
 
 % Podemos então checar se é o caso previamente mencionado, onde uma (ou poucas) câmera(s) de radar possuí(em) erros sistemáticos de detecção do tipo de veículo.
 
@@ -279,7 +281,7 @@ Outra maneira de identificar placas clonadas é verificar a existência de dois 
 
 Dadas a latitude e longitude de dois registros, podemos calcular sua distância em kilômetros utilizando a fórmula de "haversine". Para melhor performance, calculamos diretamente na query SQL para apenas buscar os dados relevantes para análises subsequentes.
 
-\begin{lstlisting}[language=SQL,caption={Fórmula de haversine para calcular distâncias em kilometros na superfície da Terra, através de latitudes e longitudes.},label={lst:sqlquery}]
+\begin{lstlisting}[language=SQL,caption={Fórmula de haversine para calcular distâncias em kilometros na superfície da Terra, através de latitudes e longitudes.},label={lst:sqlquery6}]
  6371 * ACOS(
       COS(RADIANS(t1.camera_latitude)) * COS(RADIANS(t2.camera_latitude)) *
       COS(RADIANS(t2.camera_longitude) - RADIANS(t1.camera_longitude)) +
@@ -287,7 +289,7 @@ Dadas a latitude e longitude de dois registros, podemos calcular sua distância 
     ) AS distance_km
 \end{lstlisting}
 
-\begin{lstlisting}[language=SQL,caption={Fórmula de haversine para calcular distâncias em kilometros na superfície da Terra, através de latitudes e longitudes. Sem acesso à função RADIANS() nem PI() e resolvendo erro de float point precision na função ACOS().},label={lst:sqlquery}]
+\begin{lstlisting}[language=SQL,caption={Fórmula de haversine para calcular distâncias em kilometros na superfície da Terra, através de latitudes e longitudes. Sem acesso à função RADIANS() nem PI() e resolvendo erro de float point precision na função ACOS().},label={lst:sqlquery7}]
 6371 * ACOS(LEAST(GREATEST(
       COS(t1.camera_latitude * 3.141592 / 180) * COS(t2.camera_latitude * 3.141592 / 180) * 
       COS(t2.camera_longitude * 3.141592 / 180 - t1.camera_longitude * 3.141592 / 180) + 
@@ -296,7 +298,7 @@ Dadas a latitude e longitude de dois registros, podemos calcular sua distância 
 
 Com essa função de distância, podemos observar alguns casos de mesma placa com registros de distâncias grandes, em um curto período de tempo.
 
-\begin{lstlisting}[language=SQL,caption={Exemplo de query SQL para detectar inconsistências e retornar casos de mesma placa com registros distantes um do outro, segundo a fórmula de haversine, mas com diferença de tempo entre eles de curta. Considerando inconsistente percorrer mais de 6km em menos de 3 minutos (120km/h de média). Como discutido no artigo, podemos substituir última condicional WHERE para "time\_diff\_minutes $ \leq $ distance\_km/5" para melhor resultados.},label={lst:sqlquery3}]
+\begin{lstlisting}[language=SQL,caption={Exemplo de query SQL para detectar inconsistências e retornar casos de mesma placa com registros distantes um do outro, segundo a fórmula de haversine, mas com diferença de tempo entre eles de curta. Considerando inconsistente percorrer mais de 6km em menos de 3 minutos (120km/h de média). Como discutido no artigo, podemos substituir última condicional WHERE para "time\_diff\_minutes $ \leq $ distance\_km/5" para melhor resultados.},label={lst:sqlquery8}]
 WITH distance_time_check AS (
   SELECT
     t1.placa,
@@ -345,12 +347,12 @@ ORDER BY
 \begin{longtable}{|l|l|l|l|l|l|l|}
 \hline
 TO\_HEX(placa)  & lat1 & long1 & lat2 & long2 & Distância (km) & $\Delta t$ (min)  \\ \hline
-AAEd0Z1N8R0nW6PjvFdY3uE= & -22.949    & -43.177    & -22.903 & -43.245 & 8.684  & 2         \\ \hline
-AAFHNUra1M70d1Cw4bhU5VU= & -22.954 & -43.193   & -22.817 & -43.307    & 19.215 & 0    \\ \hline
-AAAHLRM713ANhx0EEbTttcx8= & -22.880 & -43.331   & -22.835 & -43.245  & 9.628 & 0    \\ \hline
-AAHtSwsIG2PODaQXtXb9gQs= & -22.940 & -43.367   & -22.994 & -43.303   & 8.889 & 2   \\ \hline
-AAJbkMjCdI3+qr77FZOTSRo= & -22.936 & -43.333   & 22.979 & -43.588  & 26.583 & 3  \\ \hline
-\caption{\label{tab:results1}  Tabela com alguns dos dados de retorno do SQL \ref{lst:sqlquery3}. É impossível que um mesmo veículo percorra distâncias como 26,3km em 3 minutos, ou até 19,2 km em 0 minuto. Logo são casos claros de falha nos radares e/ou placas clonadas.}
+AAEd0Z1N8R0nW6PjvFdY3uE= & -22.949    & -43.177    & -22.903 & -43.245 & 8.68  & 2         \\ \hline
+AAFHNUra1M70d1Cw4bhU5VU= & -22.954 & -43.193   & -22.817 & -43.307    & 19.22 & 0    \\ \hline
+AAAHLRM713ANhx0EEbTttcx8= & -22.880 & -43.331   & -22.835 & -43.245  & 9.63 & 0    \\ \hline
+AAHtSwsIG2PODaQXtXb9gQs= & -22.940 & -43.367   & -22.994 & -43.303   & 8.89 & 2   \\ \hline
+AAJbkMjCdI3+qr77FZOTSRo= & -22.936 & -43.333   & 22.979 & -43.588  & 26.58 & 3  \\ \hline
+\caption{\label{tab:results1}  Tabela com alguns dos dados de retorno do SQL \ref{lst:sqlquery8}. É impossível que um mesmo veículo percorra distâncias como 26,6km em 3 minutos, ou até 19,2 km em 0 minuto. Logo são casos claros de falha nos radares e/ou placas clonadas.}
 \end{longtable}
 
 Utilizando tal abordagem, com limites de "\textit{time\_diff\_minutes} $\leq 3 $ E \textit{distance\_km} $ \geq 6$", conseguimos detectar 77222 casos de placas distintas com indícios de clonagem.
