@@ -86,7 +86,7 @@ camera\_longitude & FLOAT      & Longitude do radar                        \\\hl
 \caption{\label{tab:description}Descrição das colunas da tabela.}
 \end{table}
 
-\subsection{Informações gerais dos Dados}
+\subsection{Informações Gerais dos Dados}
 O dataset disponibilizado contém informações sobre 36.358.536 capturas de radares. Realizadas entre "2024-06-06 00:00:00 UTC" (5 de Junho de 2024, 9 horas da noite no Rio de Janeiro), até "2024-06-13 14:31:56 UTC" (13 de Junho de 2024, 11 horas e 31 minutos da manhã no Rio de Janeiro).
 
 
@@ -98,9 +98,16 @@ São representados no dataset 7.984.610 \textit{placas} diferentes, com um total
 
 Apenas 3 \textit{empresas} são responsáveis por todos os registros de capturas no Dataset (Figura  \ref{fig:registrosPorEmpresa}).
 
-O sistema classifica os veículos refistrados em 4 \textit{tipoveiculo}s diferentes, observando as velocidades médias de cada tipo de veículo, podemos propôr hipóteses de qual \textit{tipoveiculo} hasheado refere a qual tipo de veículo real (Figura \ref{fig:tipoVeiculoAvgSpeed}).
+O sistema classifica os veículos refistrados em 4 \textit{tipoveiculo}s diferentes, observando as velocidades médias de cada tipo de veículo, podemos propôr hipóteses de qual \textit{tipoveiculo} refere a qual tipo de veículo real (Figura \ref{fig:tipoVeiculoAvgSpeed}).
 
 Utilizaremos à frente á fim de otimização de cáculos o fato de todos os 36 milhões de registros estarem agrupados geograficamente em apenas 1421 radares fixos.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{registrosPorEmpresa.png}
+    \caption{Número de registros por empresa responsável. A empresa 1e2545af9d48c6, com 24 milhões de registros, tem responsabilidade sobre aproximadamente 67\% do Dataset. Essa distribuição é similar ao número de câmeras por empresa.}
+    \label{fig:registrosPorEmpresa}
+\end{figure}
 
 \begin{figure}
     \centering
@@ -109,12 +116,6 @@ Utilizaremos à frente á fim de otimização de cáculos o fato de todos os 36 
     \label{fig:tipoVeiculoAvgSpeed}
 \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\linewidth]{registrosPorEmpresa.png}
-    \caption{Número de registros por empresa responsável. A empresa 1e2545af9d48c6, com 24 milhões de registros, tem responsabilidade sobre aproximadamente 67\% do Dataset. Essa distribuição é similar ao número de câmeras por empresa.}
-    \label{fig:registrosPorEmpresa}
-\end{figure}
 
 \begin{lstlisting}[language=SQL,caption={Query SQL para contar quantidade de valores distintos para as colunas categóricas do dataset},label={lst:sqlquery}]
 SELECT COUNT(DISTINCT placa) AS unique_placas
@@ -150,7 +151,7 @@ Observamos na Figura \ref{fig:freqCameraNumeroTop30} que a câmera de radar iden
 \begin{figure}
     \centering
     \includegraphics[width=0.75\linewidth]{freqCameraNumeroTop30.png}
-    \caption{Enter Caption}
+    \caption{As 30 câmeras de radares com mais registros, e seu número de registros, do Município do Rio de Janeiro.}
     \label{fig:freqCameraNumeroTop30}
 \end{figure}
 
