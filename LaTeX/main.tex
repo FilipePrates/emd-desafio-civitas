@@ -146,7 +146,7 @@ camera\_numero & 1421    \\\hline
 
 \subsubsection{Número de registros por cada câmera de radar}
 
-Observamos na Figura \ref{fig:freqCameraNumeroTop30} que a câmera de radar identificada por f6b6eff6c3c578 é a que mais registrou veículos no Dataset, com aproximadamente o dobro de registros da segunda com mais registros.
+Observamos na Figura \ref{fig:freqCameraNumeroTop30} que a câmera de radar identificada por f6b6eff6c3c578 é a que mais registrou veículos no Dataset, com aproximadamente o dobro de registros da segunda com mais registros. Tal câmera, infelizmente, é uma das que indica \textit{camera\_latitude} e \textit{camera\_longitude} sempre 0 como posteriormente iremos investigar, logo não é possível testar a hipótese que essa câmera deve estar na principal via da cidade.
 
 \begin{figure}
     \centering
@@ -173,6 +173,15 @@ As velocidades dos veículos registradas no dataset foram consideradas consisten
     \caption{Histograma com as frequencias que as diferentes velocidades foram registradas pelo radares do Rio de Janeiro. Observamos uma distribuição normal em volta da média de aproximadamente 35km/h, consistente com ruas urbanas, com alguns outliers de até 255 km/h. Tais valores são altos, porém, devido à sua pequena frequência, considerados ainda consistentes com uma metrópole com vias expressas e milhões de habitantes.}
     \label{fig:histVelocidades}
 \end{figure}
+
+Investigando mais a fundo as velocidades acima de 200km/h, percebemos que por via de regra se concentram em poucas câmeras de radar, pricipalmente em vias expressas como por exemplo o \textit{camera\_numero} 2633b189184a46, que contém 390 casos de registros de velocidade superior à 200km, localizado na Av. das Américas próximo do número 4069. Nos casos de radares em ruas secundárias poderíamos remover os dados como inconsistentes, porém em casos em vias expressas, assumimos como dados reais.
+
+\begin{lstlisting}[language=SQL,caption={Query SQL para identificar quais as câmeras de radares mais capturam veículos em velocidades superiores à 200km/h, a fim de investigar suas latitudes e longitudes, e assim determinar se o registro é potencialmente válido, ou não.},label={lst:sqlquery10}]
+SELECT TO_HEX(camera_numero), camera\_latitude, camera\_longitude, count(*)
+FROM `rj-cetrio.desafio.readings_2024_06`
+WHERE velocidade > 200
+group by camera_numero
+\end{lstlisting}
 
 \subsection{Inconsistência nos dados de Latitude e Longitude}
 
@@ -302,13 +311,13 @@ Com essa função de distância, podemos observar alguns casos de mesma placa co
 WITH distance_time_check AS (
   SELECT
     t1.placa,
-    t1.datahora_captura AS datahora1,
-    t2.datahora_captura AS datahora2,
+    t1.datahora AS datahora1,
+    t2.datahora AS datahora2,
     t1.camera_latitude AS lat1,
     t1.camera_longitude AS lon1,
     t2.camera_latitude AS lat2,
     t2.camera_longitude AS lon2,
-    ABS(TIMESTAMP_DIFF(t1.datahora_captura, t2.datahora_captura, MINUTE)) AS time_diff_minutes,
+    ABS(TIMESTAMP_DIFF(t1.datahora, t2.datahora, MINUTE)) AS time_diff_minutes,
     6371 * ACOS(LEAST(GREATEST(
       COS(t1.camera_latitude * 3.141592 / 180) * COS(t2.camera_latitude * 3.141592 / 180) * 
       COS(t2.camera_longitude * 3.141592 / 180 - t1.camera_longitude * 3.141592 / 180) + 
@@ -319,7 +328,7 @@ WITH distance_time_check AS (
     `rj-cetrio.desafio.readings_2024_06` t2
   ON
     t1.placa = t2.placa
-    AND t1.datahora_captura < t2.datahora_captura
+    AND t1.datahora < t2.datahora
   WHERE t1.camera_latitude < -22.8 AND t2.camera_latitude < -22.8 
   AND t1.camera_latitude > -23.0  AND t2.camera_latitude > -23.0 
   AND t1.camera_longitude > -43.8  AND t2.camera_longitude > -43.8
@@ -355,13 +364,13 @@ AAJbkMjCdI3+qr77FZOTSRo= & -22.936 & -43.333   & 22.979 & -43.588  & 26.58 & 3  
 \caption{\label{tab:results1}  Tabela com alguns dos dados de retorno do SQL \ref{lst:sqlquery8}. É impossível que um mesmo veículo percorra distâncias como 26,6km em 3 minutos, ou até 19,2 km em 0 minuto. Logo são casos claros de falha nos radares e/ou placas clonadas.}
 \end{longtable}
 
-Utilizando tal abordagem, com limites de "\textit{time\_diff\_minutes} $\leq 3 $ E \textit{distance\_km} $ \geq 6$", conseguimos detectar 77222 casos de placas distintas com indícios de clonagem.
+Utilizando tal abordagem, com limites de "\textit{time\_diff\_minutes} $\leq 3 $ E \textit{distance\_km} $ \geq 6$", conseguimos detectar 104142 casos de placas distintas com indícios de clonagem.
 
-Podemos deixar mais genérica a condição de inconsistência, já que podem existir casos de registros que percorrem, por exemplo, 8km em 4min, a mesma velocidade incosistente, porém a SQL atual não os mostra. Para detectar todos os casos onde a distância e o $\Delta t$ são potencialmente inconsistentes, podemos utilizar a condicional "\textit{time\_diff\_minutes} $\leq$ \textit{distance\_km}/2". Assim capturamos todos os casos que acarretariam uma velocidade média de mais de 120km/h, num total de 369752 placas distintas suspeitas. Esse número elevado pode apontar um número significativo de falsos positivos.
+Podemos deixar mais genérica a condição de inconsistência, já que podem existir casos de registros que percorrem, por exemplo, 8km em 4min, a mesma velocidade incosistente, porém a SQL atual não os mostra. Para detectar todos os casos onde a distância e o $\Delta t$ são potencialmente inconsistentes, podemos utilizar a condicional "\textit{time\_diff\_minutes} $\leq$ \textit{distance\_km}/2". Assim capturamos todos os casos que acarretariam uma velocidade média de mais de 120km/h, num total de 636811 placas distintas suspeitas. Esse número elevado pode apontar um número significativo de falsos positivos.
 
-Para garantir um número menor de falsos positivos, já que numa via expressa é possível alguns veículos alcaçarem tal velocidade, utilizaremos "\textit{time\_diff\_minutes} $\leq$ \textit{distance\_km}/3", necessitando de 180km/h de média para percorrer a distância entre registros no tempo indicado. Utilizando tal condicional temos um resultado final de 344816 casos distintos de placas com registros inconsistentes.
+Para garantir um número menor de falsos positivos, já que numa via expressa é possível alguns veículos alcaçarem tal velocidade, utilizaremos "\textit{time\_diff\_minutes} $\leq$ \textit{distance\_km}/3", necessitando de 180km/h de média para percorrer a distância entre registros no tempo indicado. Utilizando tal condicional temos um resultado final de 621552 casos distintos de placas com registros inconsistentes.
 
-Para finalizar, e garantir nenhum falso positivo, podemos utilizar uma condicional mais extrema como \textbf{"\textit{time\_diff\_minutes} $ \leq $ \textit{distance\_km}/5"}, só possível se o veículo mantivesse \textbf{300km/h}, numa linha reta entre os dois ponto, já que não é possível, identificamos então \textbf{322245 casos de placas clonadas} utilizando este critério.
+Para finalizar, e garantir nenhum falso positivo, podemos utilizar uma condicional mais extrema como \textbf{"\textit{time\_diff\_minutes} $ \leq $ \textit{distance\_km}/5"}, só possível se o veículo mantivesse \textbf{300km/h}, numa linha reta entre os dois ponto, já que não é possível, identificamos então \textbf{610606 casos de placas clonadas} utilizando este critério.
 
 \subsubsection{Distância no trânsito}
 
