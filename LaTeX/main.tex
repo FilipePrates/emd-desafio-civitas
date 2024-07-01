@@ -410,7 +410,7 @@ Nesta análise assumimos uma série de simplificações, tais como:
 
 Como proximos passos, para refinar os resultados, poderíamos:
 \begin{enumerate}
-\item Verificar a possibilidade de corrigir valores de latitude/longitude incosistentes: Por exemplo, populando pelo valor de latitude/longitude de outro registro de mesmo "camera\_numero", ou obter de fonte confiável os valores de cada um dos 1421 radares, desta forma obtendo ~20\% mais registros para análise.
+\item Verificar a possibilidade de corrigir valores de latitude/longitude incosistentes: Por exemplo, obter de fonte confiável os valores de cada um dos 1421 radares, desta forma obtendo ~20\% mais registros para análise.
 \item Obter uma distância entre dois registros seguindo as ruas e tempos históricos de trânsito no Município: Por exemplo, uma função que retorne o endereço dada sua latitude e longitude, e outra função que recebe dois endereços e retorna o tempo esperado utilizando bibliotecas (ex. google.maps.MapsLibrary) externas.
 \item Analisar a possibilidade de uma ou poucas câmeras de radar estarem gerando dados errados, com placas ou tipo de veículo mal identificados, ou com datahora e/ou latitude/longitude equivocadas. Se identificados radares com tais problemas, remover os registros associados à ele do dataset. Assim diminuiríamos significativamente a quantidade de falsos positivos na solução proposta.
 \end{enumerate}
