@@ -380,6 +380,10 @@ Tal abordagem seria claramente mais custosa, porém como os registros são fixos
 
 Para uma precisão ainda melhor, podemos utilizar a datahora de captura e os dados de trânsito do momento da caputura, porém não poderíamos mais aproveitar do agrupamento dos mais de 30 milhões de valores nos 1421 radares, requerendo novamente executar um chamado a biblioteca de estimativa de tempo no trânsito para cada par de registros suspeitos, o que poderia ser computacionalmente inviável.
 
+\subsection{Placas Falsas}
+
+Também é interessante considerar a possibilidade da criação ilegal de placas não registradas. Tal evento não se caracterizaria como uma clonagem, porém com acesso aos números e letras da placa é viável a realização de uma checagem simples se tal placa é realmente válida. Esta verificação poderia se dar através de uma requisição à um sistema conectado ao cadastro geral.
+
 \section{Ferramentas utilizadas}
 
 Para o desenvolvimento da análise documentada neste artigo, foram utilizadas as seguintes ferramentas:
