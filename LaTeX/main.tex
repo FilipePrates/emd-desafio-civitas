@@ -263,6 +263,28 @@ Sobrepondo alguns dos pontos em um mapa do município obtemos \ref{fig:disp1000M
     \label{fig:disp1000Map}
 \end{figure}
 
+\subsubsection{Mapas de Calor}
+
+Agrupando os registros pelas câmeras de radar responsáveis, podemos analisar graficamente sobre um mapa do Rio de Janeiro (Figura \ref{fig:heatmapNumber}). Conseguimos assim observar os pontos onde ocorrem um maior número de registros. Vale ressaltar as áreas da Tijuca e arredores - na Rua Teodoro da Silva, Bd. 28 de Setembro, Av. Heitor Beltrão, no Centro - especialmente Av. Presidente Vargas, e em volta da Barra Olímpica - Av. Emb. Abelardo Bueno e Av. Salvador Allende.
+
+Podemos também analisar graficamente as velocidades médias de cada câmera de radar. Podemos observar que vias expressas principais da cidade: Linha Vermelha, Linha Amarela, Av. Brasil, se destacam, e no Centro da cidade a Av. Presidente Vargas e Túnel Marcello Alencar. Para esta análise consideramos velocidades iguais a 0 como registros inválidos. 
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{heatmapNumberFinal.png}
+    \caption{Mapa de calor do número de registros por câmera de radar. Podemos observar que as câmeras com maior número de detecções se concentram em areas como Centro, Tijuca e Barra Olímpica.}
+    \label{fig:heatmapNumber}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{heatmapVelocityFinal.png}
+    \caption{Mapa de Calor das velocidades médias por câmera de radar. Neste mapa, a Av. Brasil se mostra mais destacada, assim como a Av. Presidente Vargas, Túnel Marcello Alencar, Av. Emb. Abelardo Bueno e Av. Salvador Allende. A Avenida das Américas, na Barra da Tijuca, se destaca também, apesar de não estar bem coberta pelas câmeras consideradas válidas pela análise, as que a cobrem possuem velocidade média elevada.}
+    \label{fig:heatmapAvgVelocity}
+\end{figure}
+
+
 \section{Placas Clonadas}
 
 \subsection{Mesma placa em dois veículos de tipos diferentes}
@@ -414,7 +436,7 @@ Nesta análise assumimos uma série de simplificações, tais como:
 
 Como proximos passos, para refinar os resultados, poderíamos:
 \begin{enumerate}
-\item Verificar a possibilidade de corrigir valores de latitude/longitude inconsistentes: Por exemplo, obter de fonte confiável os valores de cada um dos 1421 radares, desta forma obtendo ~20\% mais registros para análise.
+\item Modelar o território do Rio de Janeiro de maneira mais precisa - O grosso modo que a latitude e longitude de certos registros foram considerados inconsistentes pode ter removido parte da Av. das Américas e Recreio dos Bandeirantes da atual análise - Poderíamos também corrigir valores de latitude/longitude errados, para tal, obteríamos de fonte confiável os endereços de cada um dos 1421 radares, desta forma obtendo ~20\% mais registros para análise.
 \item Obter uma distância entre dois registros seguindo as ruas e tempos históricos de trânsito no Município: Por exemplo, uma função que retorne o endereço dada sua latitude e longitude, e outra função que recebe dois endereços e retorna o tempo esperado utilizando bibliotecas (ex. google.maps.MapsLibrary) externas.
 \item Analisar a possibilidade de uma ou poucas câmeras de radar estarem gerando dados errados, com placas ou tipo de veículo mal identificados, ou com datahora e/ou latitude/longitude equivocadas. Se identificados radares com tais problemas, remover os registros associados à ele do dataset. Assim diminuiríamos significativamente a quantidade de falsos positivos na solução proposta.
 \end{enumerate}
