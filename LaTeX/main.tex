@@ -273,7 +273,7 @@ Podemos também analisar graficamente as velocidades médias de cada câmera de 
 \begin{figure}
     \centering
     \includegraphics[width=1\linewidth]{heatmapNumberFinal.png}
-    \caption{Mapa de calor do número de registros por câmera de radar. Podemos observar que as câmeras com maior número de detecções se concentram em areas como Centro, Tijuca e Barra Olímpica.}
+    \caption{Mapa de calor do número de registros por câmera de radar. Podemos observar que o maior número de câmeras de radar e detecções válidas se concentram em areas como Centro, Tijuca e Barra Olímpica.}
     \label{fig:heatmapNumber}
 \end{figure}
 
@@ -306,7 +306,7 @@ Para identificar o segundo caso (erro na detecção do \textit{tipoveiculo}), po
 
 \subsection{Distância entre dois registros}
 
-Outra maneira de identificar placas clonadas é verificar a existência de dois registros da mesma placa, distantes um do outro, com uma pequena diferença de \textit{datahora\_captura}. Podemos assumir que, dada uma distância suficientemente grande e uma diferença entre \textit{datahora\_captura} ($\Delta t$) suficientemente pequena, é impossível que seja o mesmo veículo em ambos os locais.
+Outra maneira de identificar placas clonadas é verificar a existência de dois registros da mesma placa, distantes um do outro, com uma pequena diferença de \textit{datahora} do registro. Podemos assumir que, dada uma distância suficientemente grande e uma diferença entre \textit{datahora} ($\Delta t$) suficientemente pequena, é impossível que seja o mesmo veículo em ambos os locais.
 
 \subsubsection{Distância em linha reta}
 
